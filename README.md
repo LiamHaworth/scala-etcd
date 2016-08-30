@@ -1,4 +1,4 @@
-scala-etcd
+scala-etcd  [ ![Download](https://api.bintray.com/packages/liamhaworth/maven/scala-etcd/images/download.svg) ](https://bintray.com/liamhaworth/maven/scala-etcd/_latestVersion) [![Build Status](https://travis-ci.org/LiamHaworth/scala-etcd.svg?branch=master)](https://travis-ci.org/LiamHaworth/scala-etcd)
 ==========
 
 A simple scala client library for [etcd]
