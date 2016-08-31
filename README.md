@@ -3,52 +3,59 @@ scala-etcd  [ ![Download](https://api.bintray.com/packages/liamhaworth/maven/sca
 
 A simple scala client library for [etcd]
 
-Uses spray http client to implement everything in a none blocking manner. It implements most of v2 api and returns objects to
-represent the json.
+This library builds upon the Spray HTTP client to implement a asynchronous client for querying Etcd. A majority of API calls for V2 are avaliable but if
+one you require doesn't exist, please open an issue, or even better, submit a pull request!
 
+**NOTE:** This repository and library is fork from the hard work of [Matt Christiansen], this is no attempt to still their work but instread to build on it and help it grow
+
+Installing the library
+======================
+
+This library is house at Bintray, to get the latest version and help on how to add it to your project, please click on the version tag in the title of the README
+
+**NOTE:** The library built against both Scala `2.10` and `2.11` for compatability
+
+Usage
+=====
+
+To begin using the library pleaes first ensure that you have an implicit [Actor System] defined, if you don't have one, you can create one like so
 
 ```Scala
-
-  val system = ActorSystem("etcd")
-  val client = new EtcdClient("http://localhost:4001")(system)
-
-  client.setKey("configKey", "configValue")
-
-  val response: Future[EtcdResponse] = client.getKey("configKey")
-
-  response onComplete {
-    case Success(response: EtcdResponse) =>
-      System.out.println(response)
-      system.shutdown()
-    case Failure(error) =>
-      System.out.println(error)
-      system.shutdown()
-  }
+implicit val system = ActorSystem("etcd")
 ```
 
-This library is avilable in maven central and is cross compiled for 2.10 and 2.11
+The EtcdClient can then automatically retreive the actor system, if you don't want to, or can't, implicitly set the ActorSystem, thats fine, the client support having the actor system passed to it during construction.
 
-```XML
-
-<dependency>
-	<groupId>net.nikore.etcd</groupId>
-	<artifactId>scala-etcd_2.11</artifactId>
-	<version>0.8</version>
-</dependency>
+```Scala
+val etcdClient = new EtcdClient("http://localhost:4001")(system)
 ```
 
-or
+For more examples on usage, please see the Wiki.
 
-```XML
+Authors and Copyright
+=====================
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+|               |                                        |
+|:--------------|:---------------------------------------|
+| **Author**    | Matt Christiansen <matt@nikore.net>    |
+| **Author**    | Liam Haworth <liam@haworth.id.au>      |
+|               |                                        |
+| **Copyright** | (c) 2014-16, Matt Christiansen.        |
+| **Copyright** | (c) 2016, Liam Haworth.                |
 
 
-<dependency>
-	<groupId>net.nikore.etcd</groupId>
-	<artifactId>scala-etcd_2.10</artifactId>
-	<version>0.8</version>
-</dependency>
-```
-
-you can see here for all versions: http://repo1.maven.org/maven2/net/nikore/etcd/
-
+[Matt Christiansen]: https://github.com/nikore
 [etcd]: http://coreos.com/blog/distributed-configuration-with-etcd/
+[Actor System]: http://akka.io/
