@@ -60,6 +60,23 @@ class EtcdClient(conn: String)(implicit val system: ActorRefFactory) {
     defaultPipeline(Delete(s"$baseUrl/$dir?recursive=$recursive"))
   }
 
+  /**
+    * Queries the Etcd API for a list
+    * of registered member nodes and their
+    * details
+    *
+    * @return A list of EtcdMembers
+    */
+  def listMembers: Future[EtcdMemberList] = {
+    val pipeline: HttpRequest => Future[EtcdMemberList] = (
+      sendReceive
+        ~> mapErrors
+        ~> unmarshal[EtcdMemberList]
+      )
+
+    pipeline(Get(s"$conn/v2/members"))
+  }
+
   private val mapErrors = (response: HttpResponse) => {
     if (response.status.isSuccess) response
     else {
