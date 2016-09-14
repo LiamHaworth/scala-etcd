@@ -1,9 +1,11 @@
 etcd:
   image: quay.io/coreos/etcd
+  environment:
+    ETCD_ADVERTISE_CLIENT_URLS: "http://127.0.0.1:2380"
+    ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379,http://0.0.0.0:4001"
+    ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380,http://0.0.0.0:7001"
   ports:
     - "4001:4001"
     - "7001:7001"
     - "2379:2379"
     - "2380:2380"
-
-
