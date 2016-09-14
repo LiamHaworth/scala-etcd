@@ -2,9 +2,10 @@ package net.nikore.etcd.apis
 
 import akka.actor.ActorRefFactory
 import net.nikore.etcd.EtcdExceptions.KeyNotFoundException
-import net.nikore.etcd.EtcdJsonProtocol.{Error, EtcdListResponse, EtcdResponse}
+import net.nikore.etcd.EtcdJsonProtocol._
 import spray.client.pipelining._
 import spray.json._
+import spray.httpx.SprayJsonSupport._
 import spray.http.{HttpRequest, HttpResponse, Uri}
 
 import scala.concurrent.Future

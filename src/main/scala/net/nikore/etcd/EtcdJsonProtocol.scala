@@ -46,11 +46,11 @@ object EtcdJsonProtocol extends DefaultJsonProtocol {
   //for handling error messages
   case class Error(errorCode: Int, message: String, cause: String, index: Int)
 
-  implicit val nodeResponseFormat = jsonFormat5(NodeResponse)
-  implicit val etcdResponseFormat = jsonFormat3(EtcdResponse)
+  implicit val nodeResponseFormat: RootJsonFormat[NodeResponse] = jsonFormat5(NodeResponse)
+  implicit val etcdResponseFormat: RootJsonFormat[EtcdResponse] = jsonFormat3(EtcdResponse)
 
   implicit val nodeListElementFormat: JsonFormat[NodeListElement] = lazyFormat(jsonFormat4(NodeListElement))
-  implicit val etcdResponseListFormat = jsonFormat2(EtcdListResponse)
+  implicit val etcdResponseListFormat: RootJsonFormat[EtcdListResponse] = jsonFormat2(EtcdListResponse)
 
   implicit val errorFormat = jsonFormat4(Error)
 }

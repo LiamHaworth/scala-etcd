@@ -5,7 +5,6 @@ import net.nikore.etcd.EtcdJsonProtocol._
 import spray.client.pipelining._
 import spray.http._
 import spray.httpx.SprayJsonSupport._
-import spray.json._
 
 import scala.concurrent.Future
 
@@ -63,7 +62,7 @@ trait MembersAPI {
         ~> unmarshal[EtcdMember]
     )
 
-    pipeline(Post(s"$connectionURI/v2/members", s"{ \"peerURLs\": ${peerURLs.toJson.compactPrint} }"))
+    pipeline(Post(s"$connectionURI/v2/members", """{ \"peerURLs\": ${peerURLs.toJson.compactPrint} }"""))
   }
 
   /**
@@ -98,7 +97,7 @@ trait MembersAPI {
         ~> mapRequestErrors
     )
 
-    pipeline(Put(s"$connectionURI/v2/members/$memberID", s"{ \"peerURLs\": ${peerURLs.toJson.compactPrint} }"))
+    pipeline(Put(s"$connectionURI/v2/members/$memberID", """{ \"peerURLs\": ${peerURLs.toJson.compactPrint} }"""))
   }
 
   /**
