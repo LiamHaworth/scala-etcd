@@ -1,6 +1,9 @@
 package net.nikore.etcd
 
+import spray.http.HttpResponse
 import spray.json._
+import spray.json.lenses.JsonLenses._
+import spray.httpx.unmarshalling.{FromResponseUnmarshaller, MalformedContent}
 
 object EtcdJsonProtocol extends DefaultJsonProtocol {
 
@@ -25,19 +28,20 @@ object EtcdJsonProtocol extends DefaultJsonProtocol {
   /**
     * Defines the spray-json format for <code>EtcdMember</code>
     */
-  implicit val etcdMemberFormat: JsonFormat[EtcdMember] = jsonFormat4(EtcdMember)
+  implicit val etcdMemberFormat: RootJsonFormat[EtcdMember] = jsonFormat4(EtcdMember)
 
   /**
-    * Defines a list of Etcd member nodes returned from the Etcd API
-    *
-    * @param members A list of <code>EtcdMember</code>
+    * Provides a response unmarshaller to retreive a list of EtcdMembers from a nested JSON response
     */
-  case class EtcdMemberList(members: List[EtcdMember])
-
-  /**
-    * Defines the spray-json format for <code>EtcdMemberList</code>
-    */
-  implicit  val etcdMemberListFormat: JsonFormat[EtcdMemberList] = jsonFormat1(EtcdMemberList)
+  implicit val etcdMemberListUnmarshaller = new FromResponseUnmarshaller[List[EtcdMember]] {
+    def apply(response: HttpResponse): Either[MalformedContent, List[EtcdMember]] = try {
+      Right(response.entity.asString.extract[List[EtcdMember]](
+        'members
+      ))
+    } catch { case ex: Throwable =>
+      Left(MalformedContent("Unable to unmarshal a EtcdMember list response", ex))
+    }
+  }
 
   //for handling error messages
   case class Error(errorCode: Int, message: String, cause: String, index: Int)
