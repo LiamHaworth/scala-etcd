@@ -1,7 +1,8 @@
-etcd:
+etcd-server1:
   image: quay.io/coreos/etcd
   environment:
-    ETCD_ADVERTISE_CLIENT_URLS: "http://127.0.0.1:2380"
+    ETCD_ADVERTISE_CLIENT_URLS: "http://172.17.0.2:2379,http://172.17.0.2:4001"
+    ETCD_INITAL_ADVERTISE_PEER_URLS: "http://172.17.0.2:2379,http://172.17.0.2:4001"
     ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379,http://0.0.0.0:4001"
     ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380,http://0.0.0.0:7001"
   ports:
@@ -9,3 +10,16 @@ etcd:
     - "7001:7001"
     - "2379:2379"
     - "2380:2380"
+
+etcd-server2:
+  image: quay.io/coreos/etcd
+  environment:
+    ETCD_ADVERTISE_CLIENT_URLS: "http://172.17.0.3:2379,http://172.17.0.3:4001"
+    ETCD_INITAL_ADVERTISE_PEER_URLS: "http://172.17.0.3:2379,http://172.17.0.3:4001"
+    ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379,http://0.0.0.0:4001"
+    ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380,http://0.0.0.0:7001"
+  ports:
+    - "4002:4001"
+    - "7002:7001"
+    - "2479:2379"
+    - "2480:2380"

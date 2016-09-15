@@ -23,7 +23,7 @@ object EtcdJsonProtocol extends DefaultJsonProtocol {
     * @param peerURLs A list of peer URLs related to the member
     * @param clientURLs A list of clientURLs related to the member
     */
-  case class EtcdMember(id: String, name: String, peerURLs: List[String], clientURLs: List[String])
+  case class EtcdMember(id: Option[String] = None, name: Option[String] = None, peerURLs: List[String], clientURLs: Option[List[String]] = None)
 
   /**
     * Defines the spray-json format for <code>EtcdMember</code>

@@ -29,6 +29,10 @@ class EtcdClientSpec extends FlatSpec with Matchers {
   val client = EtcdClient()
 
 
+  ///////////////////////////
+  // etcd - Keys API Tests //
+  ///////////////////////////
+
   "Keys API" should "support inserting a new key-value pair" in {
     val setKeyFuture = client.setKey("testKey", "testValue")
 
@@ -66,6 +70,29 @@ class EtcdClientSpec extends FlatSpec with Matchers {
     whenReady(deleteKeyFuture, timeout) { response =>
       response.action should equal("delete")
       response.node.key should equal("/testKey")
+    }
+  }
+
+
+  //////////////////////////////
+  // etcd - Members API Tests //
+  //////////////////////////////
+
+  "Members API" should "list a default member" in {
+    val memberListFuture = client.listMembers
+
+    whenReady(memberListFuture, timeout) { list =>
+      list.exists(_.name.get == "default") should equal(true)
+    }
+  }
+
+  it should "support adding a new member to the cluster" in {
+    val addMemberFuture = client.addNewMember(List[String](
+      "http://172.17.0.3:2480"
+    ))
+
+    whenReady(addMemberFuture, timeout) { member =>
+      member.id.isDefined should equal(true)
     }
   }
 }

@@ -3,6 +3,7 @@ package net.nikore.etcd.apis
 import akka.actor.ActorRefFactory
 import net.nikore.etcd.EtcdJsonProtocol._
 import spray.client.pipelining._
+import spray.http.StatusCodes.ClientError
 import spray.http._
 import spray.httpx.SprayJsonSupport._
 
@@ -62,7 +63,16 @@ trait MembersAPI {
         ~> unmarshal[EtcdMember]
     )
 
-    pipeline(Post(s"$connectionURI/v2/members", """{ \"peerURLs\": ${peerURLs.toJson.compactPrint} }"""))
+    pipeline(
+      Post(
+        s"$connectionURI/v2/members",
+        // NOTE: Manual fix for Etcd bug #6433 while we wait for the fix to be released in stable CoreOS
+        HttpEntity(
+          MediaType.custom("application", "json", binary = true),
+          EtcdMember(peerURLs = peerURLs).toJson.toString().getBytes()
+        )
+      )
+    )
   }
 
   /**
@@ -84,11 +94,11 @@ trait MembersAPI {
   /**
     * Updates the peer URLs for an existing member
     *
-    * @param memberID The ID of the EtcdMember to update
+    * @param member The member to update
     * @param peerURLs A list of peer URLs to update the member listing with
     * @return Returns the HttpResponse from the API server
     */
-  def updateMemberPeerURLs(memberID: String, peerURLs: List[String]): Future[HttpResponse] = {
+  def updateMemberPeerURLs(member: EtcdMember, peerURLs: List[String]): Future[HttpResponse] = {
     if(peerURLs.isEmpty)
       throw new Exception("The list of peer URLs provided is empty, a new member must have at least 1 peer URL")
 
@@ -97,7 +107,16 @@ trait MembersAPI {
         ~> mapRequestErrors
     )
 
-    pipeline(Put(s"$connectionURI/v2/members/$memberID", """{ \"peerURLs\": ${peerURLs.toJson.compactPrint} }"""))
+    pipeline(
+      Put(
+        s"$connectionURI/v2/members/${member.id}",
+        // NOTE: Manual fix for Etcd bug #6433 while we wait for the fix to be released in stable CoreOS
+        HttpEntity(
+          MediaType.custom("application", "json", binary = true),
+          member.copy(peerURLs = peerURLs).toJson.toString().getBytes()
+        )
+      )
+    )
   }
 
   /**
@@ -108,12 +127,14 @@ trait MembersAPI {
       response
     else
       response.status match {
+        case ClientError(error) =>
+          throw new Exception(response.entity.asString)
         case StatusCodes.BadRequest =>
           throw new Exception("The request was malformed or missing fields, please ensure everything is correct in your request")
         case StatusCodes.Conflict =>
           throw new Exception("There was a conflict when executing the request, please ensure peer hasn't exited in the cluster before")
         case StatusCodes.InternalServerError =>
-          throw new Exception("The API server encounted an internal error when processing the request")
+          throw new Exception("The API server encountered an internal error when processing the request")
       }
   }
 }
