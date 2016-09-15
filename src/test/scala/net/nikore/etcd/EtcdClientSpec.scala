@@ -3,8 +3,10 @@ package net.nikore.etcd
 import akka.actor.ActorSystem
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
-import scala.concurrent.duration._
 import org.scalatest.{FlatSpec, Matchers}
+
+import scala.concurrent.duration._
+import scala.sys.process._
 
 /**
   * Defines unit tests for the EtcD Client.
@@ -87,12 +89,15 @@ class EtcdClientSpec extends FlatSpec with Matchers {
   }
 
   it should "support adding a new member to the cluster" in {
-    val addMemberFuture = client.addNewMember(List[String](
-      "http://172.17.0.3:2480"
-    ))
+    val addMemberFuture = client.addNewMember(
+      List[String]("http://172.17.0.3:2380"),
+      name = Some("peer")
+    )
 
     whenReady(addMemberFuture, timeout) { member =>
       member.id.isDefined should equal(true)
     }
+
+    "docker-compose up -d etcd-server2".!
   }
 }

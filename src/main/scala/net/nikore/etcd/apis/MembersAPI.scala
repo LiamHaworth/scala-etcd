@@ -51,9 +51,10 @@ trait MembersAPI {
     * peer to add to the cluster
     *
     * @param peerURLs A list of peer URLs for the new member
+    * @param name The name of the new peer
     * @return The EtcdMember with it's ID as assigned by the cluster
     */
-  def addNewMember(peerURLs: List[String]): Future[EtcdMember] = {
+  def addNewMember(peerURLs: List[String], name: Option[String] = None): Future[EtcdMember] = {
     if(peerURLs.isEmpty)
       throw new Exception("The list of peer URLs provided is empty, a new member must have at least 1 peer URL")
 
@@ -69,7 +70,7 @@ trait MembersAPI {
         // NOTE: Manual fix for Etcd bug #6433 while we wait for the fix to be released in stable CoreOS
         HttpEntity(
           MediaType.custom("application", "json", binary = true),
-          EtcdMember(peerURLs = peerURLs).toJson.toString().getBytes()
+          EtcdMember(name = name, peerURLs = peerURLs).toJson.toString().getBytes()
         )
       )
     )
