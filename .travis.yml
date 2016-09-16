@@ -15,7 +15,7 @@ before_install:
   - docker-compose up -d etcd-server1
   - docker-compose ps
 
-after_install:
+after_script:
   - docker logs scalaetcd_etcd-server1_1
   - docker logs scalaetcd_etcd-server2_1 
   - docker-compose kill
