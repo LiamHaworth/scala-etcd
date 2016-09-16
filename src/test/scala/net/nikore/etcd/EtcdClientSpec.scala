@@ -1,6 +1,7 @@
 package net.nikore.etcd
 
 import akka.actor.ActorSystem
+import net.nikore.etcd.EtcdJsonProtocol.EtcdMember
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.concurrent.ScalaFutures._
 import org.scalatest.{FlatSpec, Matchers}
@@ -88,9 +89,9 @@ class EtcdClientSpec extends FlatSpec with Matchers {
     }
   }
 
-  it should "support adding a new member to the cluster" in {
+  it should "add a new member to the cluster" in {
     val addMemberFuture = client.addNewMember(
-      List[String]("http://172.17.0.3:2380"),
+      List[String]("http://etcd-server2:2380", "http://etcd-server2:7001"),
       name = Some("peer")
     )
 
@@ -99,5 +100,31 @@ class EtcdClientSpec extends FlatSpec with Matchers {
     }
 
     "docker-compose up -d etcd-server2".!
+    Thread.sleep(5000)
+
+    val memberListFuture = client.listMembers
+
+    whenReady(memberListFuture, timeout) { list =>
+      list.exists(_.name.get == "peer") should equal(true)
+    }
+  }
+
+  it should "update peer URLs of a member" ignore {
+    //TODO(LiamHaworth): I'm unsure of how to do this test
+  }
+
+  it should "remove a member from the cluser" in {
+    val listMemberFuture = client.listMembers
+    var member: EtcdMember = null
+
+    whenReady(listMemberFuture, timeout) { list =>
+      member = list.find(_.name.get == "peer").get
+    }
+
+    val deleteMemberFuture = client.deleteMember(member.id.get)
+
+    whenReady(deleteMemberFuture, timeout) { response =>
+      response.status.isSuccess should equal(true)
+    }
   }
 }
