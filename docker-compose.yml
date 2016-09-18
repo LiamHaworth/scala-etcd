@@ -1,9 +1,38 @@
-etcd:
-  image: quay.io/coreos/etcd
+etcd-server1:
+  image: "quay.io/coreos/etcd:v3.0.8"
+  hostname: etcd-server1
+  extra_hosts:
+    - "etcd-server1:172.17.0.2"
+    - "etcd-server2:172.17.0.3"
+  environment:
+    ETCD_NAME: "default"
+    ETCD_ADVERTISE_CLIENT_URLS: "http://etcd-server1:2379,http://etcd-server1:4001"
+    ETCD_INITIAL_ADVERTISE_PEER_URLS: "http://etcd-server1:2380,http://etcd-server1:7001"
+    ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379,http://0.0.0.0:4001"
+    ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380,http://0.0.0.0:7001"
+    ETCD_INITIAL_CLUSTER: "default=http://etcd-server1:2380,default=http://etcd-server1:7001"
+    ETCD_INITIAL_CLUSTER_STATE: "new"
   ports:
     - "4001:4001"
     - "7001:7001"
     - "2379:2379"
     - "2380:2380"
 
-
+etcd-server2:
+  image: "quay.io/coreos/etcd:v3.0.8"
+  hostname: etcd-server2
+  links:
+    - etcd-server1
+  environment:
+    ETCD_NAME: "peer"
+    ETCD_ADVERTISE_CLIENT_URLS: "http://etcd-server2:2379,http://etcd-server2:4001"
+    ETCD_INITIAL_ADVERTISE_PEER_URLS: "http://etcd-server2:2380,http://etcd-server2:7001"
+    ETCD_LISTEN_CLIENT_URLS: "http://0.0.0.0:2379,http://0.0.0.0:4001"
+    ETCD_LISTEN_PEER_URLS: "http://0.0.0.0:2380,http://0.0.0.0:7001"
+    ETCD_INITIAL_CLUSTER: "default=http://etcd-server1:2380,default=http://etcd-server1:7001,peer=http://etcd-server2:2380,peer=http://etcd-server2:7001"
+    ETCD_INITIAL_CLUSTER_STATE: "existing"
+  ports:
+    - "4002:4001"
+    - "7002:7001"
+    - "2479:2379"
+    - "2480:2380"

@@ -12,11 +12,18 @@ before_install:
   - openssl aes-256-cbc -K $encrypted_f80571800bec_key -iv $encrypted_f80571800bec_iv -in .credentials.enc -out .credentials -d
   - mkdir -p $HOME/.bintray
   - cp .credentials $HOME/.bintray/.credentials
-  - docker-compose up -d
+  - docker-compose up -d etcd-server1
   - docker-compose ps
 
-after_install:
-  - docker-compose stop
+after_script:
+  - docker logs scalaetcd_etcd-server1_1
+  - docker logs scalaetcd_etcd-server2_1 
+  - docker-compose kill
+  - docker-compose rm -f
 
 after_success:
-  - sbt ++$TRAVIS_SCALA_VERSION publish
+  if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
+    sbt ++$TRAVIS_SCALA_VERSION publish
+  else
+    echo "Not on master! I won't deploy the package"
+  fi
