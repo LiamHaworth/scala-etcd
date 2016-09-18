@@ -22,8 +22,4 @@ after_script:
   - docker-compose rm -f
 
 after_success:
-  if ([ "$TRAVIS_BRANCH" == "master" ] || [ ! -z "$TRAVIS_TAG" ]) && [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
-    sbt ++$TRAVIS_SCALA_VERSION publish
-  else
-    echo "Not on master! I won't deploy the package"
-  fi
+  - "([ \"$TRAVIS_BRANCH\" == \"master\" ] || [ ! -z \"$TRAVIS_TAG\" ]) && [ \"$TRAVIS_PULL_REQUEST\" == \"false\" ] && sbt ++$TRAVIS_SCALA_VERSION publish"
