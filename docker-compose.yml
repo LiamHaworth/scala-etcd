@@ -1,5 +1,5 @@
 etcd-server1:
-  image: quay.io/coreos/etcd
+  image: "quay.io/coreos/etcd:v3.0.8"
   hostname: etcd-server1
   extra_hosts:
     - "etcd-server1:172.17.0.2"
@@ -19,7 +19,7 @@ etcd-server1:
     - "2380:2380"
 
 etcd-server2:
-  image: quay.io/coreos/etcd
+  image: "quay.io/coreos/etcd:v3.0.8"
   hostname: etcd-server2
   links:
     - etcd-server1
